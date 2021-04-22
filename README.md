@@ -1,16 +1,10 @@
 # fhaair
 
-A new Flutter project.
+An example exercise for the Mobile Information Systems course at FH-Aachen in the summer semester 2021
 
-## Getting Started
+## Step 1: project creation
 
-This project is a starting point for a Flutter application.
+- The solution that is shared here has been created with the following command: 'flutter create --org de.fh_aachen.mis fhaair'
+- When you want to distribute an app, the package name (org) cannot be the default name 'com.example'. So, here I have chosen the package name de.fh_aachen.mis. A package name cannot contain '-' as in fh-aachen
+- The project name is fhaair (Fachhochschule Aachen Air)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.

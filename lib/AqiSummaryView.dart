@@ -1,7 +1,9 @@
+import 'package:fhaair/model/Airquality.dart';
 import 'package:flutter/material.dart';
 
 class AqiSummaryView extends StatelessWidget {
-  final Map data;
+  // final Map data;
+  final AirQuality data;
 
   AqiSummaryView({Key key, @required this.data}) : super(key: key);
 
@@ -12,7 +14,7 @@ class AqiSummaryView extends StatelessWidget {
         Column(
           children: [
             Text(
-              this.data["AQI"].toString() ?? '',
+              this.data.aqi.toString() ?? '',
               style: TextStyle(
                 fontSize: 50,
                 color: Colors.white,
@@ -20,10 +22,10 @@ class AqiSummaryView extends StatelessWidget {
               ),
             ),
             Text(
-              this.data["aqiInfo"] != null
-                  ? this.data["aqiInfo"]["pollutant"] +
+              this.data.aqiInfo != null
+                  ? this.data.aqiInfo.pollutant +
                       ': ' +
-                      this.data["aqiInfo"]["concentration"].toString()
+                      this.data.aqiInfo.concentration.toString()
                   : '',
               style: TextStyle(
                 fontSize: 18,
@@ -37,9 +39,9 @@ class AqiSummaryView extends StatelessWidget {
           padding: const EdgeInsets.only(top: 5),
           child: Column(
             children: [
-              _mapAqiToImage(this.data["AQI"]),
+              _mapAqiToImage(this.data.aqi),
               Text(
-                this.data["aqiInfo"]["category"],
+                this.data.aqiInfo.category,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white,
@@ -54,7 +56,7 @@ class AqiSummaryView extends StatelessWidget {
     );
   }
 
-  Image _mapAqiToImage(double aqi) {
+  Image _mapAqiToImage(int aqi) {
     String asset;
     if (aqi <= 50) {
       asset = 'assets/aqi/aqi_0.png';

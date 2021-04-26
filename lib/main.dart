@@ -6,6 +6,7 @@ import 'package:fhaair/CityEntryView.dart';
 import 'package:fhaair/GradientContainer.dart';
 import 'package:fhaair/LastUpdatedView.dart';
 import 'package:fhaair/locationView.dart';
+import 'package:fhaair/model/Airquality.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert' as convert;
@@ -39,35 +40,48 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var environmentalData;
-  var pollen;
+  // 1
+  // var environmentalData;
+  // var pollen;
+
+  // 2
+  // AirQuality environmentalData;
+
+  // 3
+  Future<AirQuality> environmentalData;
 
   @override
   initState() {
-    environmentalData = Map();
-    pollen = Map();
-    loadData();
+    // environmentalData = Map();
+    // pollen = Map();
+    environmentalData = loadAirQuality();
     super.initState();
   }
 
-  void loadData() async {
-    print('loading data...');
+  Future<AirQuality> loadAirQuality() async {
+    // waits for the rootBundle to load the json asset and then parses the file to a Map
+    Map ambee = await rootBundle.loadStructuredData<Map<String, dynamic>>(
+        "assets/ambee.json", (String s) async => json.decode(s));
 
+    var ed = await ambeeCall(ambee["api_token"],
+        "latest/by-postal-code?postalCode=10115&countryCode=DE");
+    return AirQuality.fromJson(ed['stations'][0]);
+  }
+
+  Future<AirQuality> loadPollen() async {
     // waits for the rootBundle to load the json asset and then parses the file to a Map
     Map ambee = await rootBundle.loadStructuredData<Map<String, dynamic>>(
         "assets/ambee.json", (String s) async => json.decode(s));
     print("key: ${ambee['api_token']}"); // For debug purposes to show the key
 
-    var ed = await ambeeCall(ambee["api_token"],
-        "latest/by-postal-code?postalCode=10115&countryCode=DE");
-    setState(() => {
-          environmentalData = ed['stations'][0],
-        });
-    var pollen = await ambeeCall(
-        ambee["api_token"], "/forecast/pollen/by-place?place=Berlin");
-    setState(() => {
-          pollen = pollen['data'],
-        });
+    // print(aq);
+    // var pollen = await ambeeCall(
+    //     ambee["api_token"], "/forecast/pollen/by-place?place=Berlin");
+    // setState(() => {
+    //       pollen = pollen['data'],
+    //     });
+
+    return null;
   }
 
   Future<Map<String, dynamic>> ambeeCall(String token, String path) async {
@@ -98,25 +112,37 @@ class _MyHomePageState extends State<MyHomePage> {
             height: MediaQuery.of(context).size.height,
             // decoration: BoxDecoration(border: Border.all()),
             // padding: EdgeInsets.all(15),
-            child: ListView(
-              children: [
-                CityEntryView(),
-                LocationView(
-                    longitude: environmentalData["lng"] ?? 0,
-                    latitude: environmentalData["lat"] ?? 0,
-                    city: environmentalData["placeName"] ?? ''),
-                SizedBox(height: 50),
-                //AqiDescriptionView(data: environmentalData),
-                AqiSummaryView(data: environmentalData),
-                SizedBox(height: 140),
-                _buildDataRow(environmentalData, ["CO", "NO2", "OZONE"]),
-                _buildDataRow(environmentalData, ["SO2", "PM10", "PM25"]),
-                LastUpdatedView(
-                  lastUpdatedOn: environmentalData["updatedAt"] != null
-                      ? DateTime.tryParse(environmentalData["updatedAt"])
-                      : DateTime.now(),
-                ),
-              ],
+            child: FutureBuilder(
+              future: environmentalData,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return ListView(
+                    children: [
+                      CityEntryView(),
+                      LocationView(
+                        longitude: snapshot.data.lng ??
+                            0, // environmentalData["lng"] ?? 0,
+                        latitude:
+                            snapshot.data.lat, // environmentalData["lat"] ?? 0,
+                        city: snapshot.data.placeName,
+                      ), //environmentalData["placeName"] ?? ''),
+                      SizedBox(height: 50),
+                      //AqiSummaryView(data: environmentalData),
+                      AqiSummaryView(data: snapshot.data),
+                      SizedBox(height: 140),
+                      // _buildDataRow(environmentalData, ["CO", "NO2", "OZONE"]),
+                      // _buildDataRow(environmentalData, ["SO2", "PM10", "PM25"]),
+                      _buildDataRow(snapshot.data, ["CO", "NO2", "OZONE"]),
+                      _buildDataRow(snapshot.data, ["SO2", "PM10", "PM25"]),
+                      LastUpdatedView(
+                        lastUpdatedOn: snapshot.data.updatedAt,
+                      ),
+                    ],
+                  );
+                } else {
+                  return Container();
+                }
+              },
             ),
           ),
         ),
@@ -124,10 +150,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildDataRow(Map data, List labels) {
+  Widget _buildDataRow(AirQuality data, List labels) {
+    Map m = data.toMap();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: labels.map((item) => _buildDataItem(item, data[item])).toList(),
+      children: labels.map((item) => _buildDataItem(item, m[item])).toList(),
       // children: [
       //   _buildDataItem("CO", data["CO"]),
       //   _buildDataItem("NO2", data["NO2"], fractionDigits: 3),

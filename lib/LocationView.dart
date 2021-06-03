@@ -16,7 +16,7 @@ class LocationView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(children: [
-        Text('${this.city.toUpperCase()}',
+        Text('${this.city?.toUpperCase()}',
             style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.w300,

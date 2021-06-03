@@ -1,4 +1,6 @@
+import 'package:fhaair/model/CityModel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CityEntryView extends StatelessWidget {
   Widget build(BuildContext context) {
@@ -33,10 +35,15 @@ class CityEntryView extends StatelessWidget {
           ),
           SizedBox(width: 10),
           Expanded(
-            child: TextField(
-              decoration: InputDecoration.collapsed(hintText: "Enter City"),
-              onSubmitted: null,
-            ),
+            child: Consumer<CityModel>(builder: (context, model, child) {
+              return TextField(
+                decoration: InputDecoration.collapsed(hintText: "Enter City"),
+                onSubmitted: (text) {
+                  print('The city we are looking for is $text!');
+                  model.setCity(text);
+                },
+              );
+            }),
           ),
         ],
       ),
